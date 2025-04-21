@@ -17,6 +17,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -28,11 +33,20 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    WeatherScreen()
+                val navController = rememberNavController()
+                NavHost(navController, startDestination = "location") {
+                    composable("location") {
+                        LocationScreen { city ->
+                            navController.navigate("weather/${city}")
+                        }
+                    }
+                    composable(
+                        route = "weather/{city}",
+                        arguments = listOf(navArgument("city") { type = NavType.StringType })
+                    ) { backStackEntry ->
+                        val city = backStackEntry.arguments?.getString("city") ?: "Praha"
+                        WeatherScreen(startCity = city)
+                    }
                 }
             }
         }
@@ -50,8 +64,8 @@ data class Weather(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WeatherScreen() {
-    var city by remember { mutableStateOf("Praha") }
+fun WeatherScreen(startCity: String) {
+    var city by remember { mutableStateOf(startCity) }
     var weather by remember { mutableStateOf<Weather?>(null) }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }

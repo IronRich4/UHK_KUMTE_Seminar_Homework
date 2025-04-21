@@ -50,11 +50,15 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
-    // Coroutines - pravděpodobně již máš v libs.versions.toml
+    implementation ("androidx.navigation:navigation-compose:2.5.0")
+    implementation ("com.google.android.gms:play-services-location:21.0.1")
+
+    // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
     // JSON knihovnu pro zpracování API odpovědí
     implementation("org.json:json:20240303")
+    implementation(libs.play.services.location)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

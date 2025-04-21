@@ -34,6 +34,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 val navController = rememberNavController()
+                var temperatureUnit by remember { mutableStateOf("Celsius") } // Default value
+
                 NavHost(navController, startDestination = "location") {
                     composable("location") {
                         LocationScreen { city ->
@@ -45,7 +47,19 @@ class MainActivity : ComponentActivity() {
                         arguments = listOf(navArgument("city") { type = NavType.StringType })
                     ) { backStackEntry ->
                         val city = backStackEntry.arguments?.getString("city") ?: "Praha"
-                        WeatherScreen(city)
+                        WeatherScreen(
+                            startCity = city,
+                            temperatureUnit = temperatureUnit,
+                            onNavigateToSettings = { navController.navigate("settings") }
+                        )
+                    }
+                    composable("settings") {
+                        SettingsScreen(
+                            onBack = { navController.popBackStack() },
+                            onTemperatureUnitChanged = { unit ->
+                                temperatureUnit = unit
+                            }
+                        )
                     }
                 }
             }
@@ -182,7 +196,10 @@ fun WeatherScreen() {
                     modifier = Modifier.padding(16.dp)
                 )
             } else if (weather != null) {
-                WeatherCard(weather!!)
+                WeatherCard(
+                    weather!!,
+                    temperatureUnit = "°C"  // nebo "metric" nebo jiná hodnota podle vašeho používání
+                )
             }
         }
     }

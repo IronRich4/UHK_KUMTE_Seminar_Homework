@@ -7,6 +7,8 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,7 +36,11 @@ data class Weather(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WeatherScreen(startCity: String) {
+fun WeatherScreen(
+    startCity: String,
+    temperatureUnit: String,
+    onNavigateToSettings: () -> Unit
+) {
     var city by remember { mutableStateOf(startCity) }
     var weather by remember { mutableStateOf<Weather?>(null) }
     var isLoading by remember { mutableStateOf(false) }
@@ -43,6 +49,7 @@ fun WeatherScreen(startCity: String) {
     val focusManager = LocalFocusManager.current
     val TAG = "WeatherScreen"
 
+    // Funkce pro bezpečné načtení počasí
     fun loadWeather(cityName: String) {
         if (cityName.isBlank()) {
             errorMessage = "Zadejte název města"
@@ -57,26 +64,33 @@ fun WeatherScreen(startCity: String) {
                 Log.d(TAG, "Načítání počasí pro město: $cityName")
 
                 val fetchedWeather = withContext(Dispatchers.IO) {
-                    val apiKey = "0cbdaf5e8430497d15e4a5784cc9c1f8" // NAHRAĎ SVÝM API KLÍČEM!!
-                    val url = URL("https://api.openweathermap.org/data/2.5/weather?q=$cityName&units=metric&appid=$apiKey&lang=cz")
+                    val apiKey = "0cbdaf5e8430497d15e4a5784cc9c1f8" // Replace with your actual API key
 
-                    val response = url.readText()
-                    Log.d(TAG, "API odpověď: $response")
+                    val units = if (temperatureUnit == "Fahrenheit") "imperial" else "metric" // Use "imperial" for Fahrenheit
+                    val url = URL("https://api.openweathermap.org/data/2.5/weather?q=$cityName&units=$units&appid=$apiKey&lang=cz")
 
-                    val jsonObj = JSONObject(response)
-                    val main = jsonObj.getJSONObject("main")
-                    val wind = jsonObj.getJSONObject("wind")
-                    val weatherArray = jsonObj.getJSONArray("weather")
-                    val weatherObj = weatherArray.getJSONObject(0)
+                    try {
+                        val response = url.readText()
+                        Log.d(TAG, "API odpověď: $response")
 
-                    Weather(
-                        city = jsonObj.getString("name"),
-                        temperature = main.getDouble("temp"),
-                        description = weatherObj.getString("description"),
-                        humidity = main.getInt("humidity"),
-                        windSpeed = wind.getDouble("speed"),
-                        iconCode = weatherObj.getString("icon")
-                    )
+                        val jsonObj = JSONObject(response)
+                        val main = jsonObj.getJSONObject("main")
+                        val wind = jsonObj.getJSONObject("wind")
+                        val weatherArray = jsonObj.getJSONArray("weather")
+                        val weatherObj = weatherArray.getJSONObject(0)
+
+                        Weather(
+                            city = jsonObj.getString("name"),
+                            temperature = main.getDouble("temp"),
+                            description = weatherObj.getString("description"),
+                            humidity = main.getInt("humidity"),
+                            windSpeed = wind.getDouble("speed"),
+                            iconCode = weatherObj.getString("icon")
+                        )
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Chyba při čtení odpovědi: ${e.message}", e)
+                        throw e
+                    }
                 }
 
                 weather = fetchedWeather
@@ -107,6 +121,11 @@ fun WeatherScreen(startCity: String) {
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
+                },
+                actions = {
+                    IconButton(onClick = { onNavigateToSettings() }) {
+                        Icon(Icons.Filled.Settings, contentDescription = "Settings")
+                    }
                 }
             )
         }
@@ -155,7 +174,7 @@ fun WeatherScreen(startCity: String) {
                     )
                 }
                 weather != null -> {
-                    WeatherCard(weather!!)
+                    WeatherCard(weather!!, temperatureUnit)
                 }
             }
         }
@@ -163,7 +182,7 @@ fun WeatherScreen(startCity: String) {
 }
 
 @Composable
-fun WeatherCard(weather: Weather) {
+fun WeatherCard(weather: Weather, temperatureUnit: String) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -200,8 +219,14 @@ fun WeatherCard(weather: Weather) {
                 modifier = Modifier.padding(vertical = 8.dp)
             )
 
+            val temperature = if (temperatureUnit == "Fahrenheit") {
+                weather.temperature
+            } else {
+                weather.temperature
+            }
+
             Text(
-                text = "${weather.temperature.toInt()}°C",
+                text = "${temperature.toInt()}°${if (temperatureUnit == "Fahrenheit") "F" else "C"}",
                 fontSize = 48.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(vertical = 8.dp)

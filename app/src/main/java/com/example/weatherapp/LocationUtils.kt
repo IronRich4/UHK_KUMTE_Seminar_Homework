@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.location.Geocoder
 import android.location.Location
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.*
@@ -34,6 +35,19 @@ suspend fun getCurrentLocation(context: Context): Location? {
 
 fun getCityName(context: Context, location: Location): String {
     val geocoder = Geocoder(context, Locale.getDefault())
-    val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
-    return addresses?.firstOrNull()?.locality ?: "Neznámé město"
+    try {
+        Log.d("LocationUtils", "getCityName: Latitude = ${location.latitude}, Longitude = ${location.longitude}")
+        val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
+        if (addresses != null && addresses.isNotEmpty()) {
+            val cityName = addresses[0]?.locality ?: addresses[0]?.subAdminArea ?: "Neznámé město"
+            Log.d("LocationUtils", "getCityName: CityName = $cityName")
+            return cityName
+        } else {
+            Log.w("LocationUtils", "getCityName: No addresses found for location")
+            return "Neznámé město"
+        }
+    } catch (e: Exception) {
+        Log.e("LocationUtils", "getCityName: Error = ${e.message}")
+        return "Neznámé město"
+    }
 }

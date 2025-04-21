@@ -10,7 +10,7 @@ import java.net.URL
 
 class OpenWeatherLoader : WeatherLoader {
     // API klíč pro OpenWeatherMap - používáme prozatím test klíč pro ladění
-    private val API_KEY = "0cbdaf5e8430497d15e4a5784cc9c1f8" // testovací klíč pro ladění
+    private val API_KEY = "0cbdaf5e8430497d15e4a5784cc9c1f8"
     private val WEATHER_URL = "https://api.openweathermap.org/data/2.5/weather"
 
     override suspend fun loadWeather(city: String): Weather = withContext(Dispatchers.IO) {

@@ -1,14 +1,10 @@
 package com.example.kumte_simplyweather
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.location.Geocoder
 import android.location.Location
 import android.util.Log
-import androidx.activity.ComponentActivity
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.*
 import com.google.android.gms.location.LocationServices
 import java.util.*
 import com.google.android.gms.tasks.Task

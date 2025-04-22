@@ -64,9 +64,9 @@ fun WeatherScreen(
                 Log.d(TAG, "Načítání počasí pro město: $cityName")
 
                 val fetchedWeather = withContext(Dispatchers.IO) {
-                    val apiKey = "0cbdaf5e8430497d15e4a5784cc9c1f8" // Replace with your actual API key
+                    val apiKey = "0cbdaf5e8430497d15e4a5784cc9c1f8" // API key
 
-                    val units = if (temperatureUnit == "Fahrenheit") "imperial" else "metric" // Use "imperial" for Fahrenheit
+                    val units = if (temperatureUnit == "Fahrenheit") "imperial" else "metric" // "imperial" = Fahrenheit
                     val url = URL("https://api.openweathermap.org/data/2.5/weather?q=$cityName&units=$units&appid=$apiKey&lang=cz")
 
                     try {
